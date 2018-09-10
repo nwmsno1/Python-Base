@@ -1,2 +1,2 @@
 # python-learning
-##　daily learning with python3
+daily learning with python3
