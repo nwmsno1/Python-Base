@@ -32,7 +32,7 @@ class visainst(object):
     
 if __name__ == '__main__':
     list_inst()
-    ins = visainst('USB0::0x2A8D::0x1772::MY57190679::INSTR')
+    ins = visainst('USB0::0x2A8D::0x1772::MYxxxxxxxx::INSTR')
     print(ins.inst_name)
     ins.write(':WAVeform:POINts:MODE ASCii')
     ins.write(':WAVeform:FORMat ASCii')
