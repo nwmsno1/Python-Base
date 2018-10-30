@@ -35,6 +35,7 @@ plt.plot([x0, x0], [y0, 0], 'k--', lw=3)
 # method1
 ############################################
 # 设置关键位置的提示信息
+# xytext=(+30, -30) 在点的上下30显示
 plt.annotate(r'$x**2+2=%s$' % y0, xy=(x0, y0), xycoords='data', xytext=(+30, -30), textcoords='offset points', fontsize=16,
              arrowprops=dict(arrowstyle='->', connectionstyle='arc3, rad=.2'))
 
