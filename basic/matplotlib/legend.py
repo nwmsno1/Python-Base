@@ -18,6 +18,7 @@ plt.xticks(new_ticks)  # 设置x轴刻度：范围是(-1,2);个数是5
 plt.yticks([-2, -1.8, -1, 1.22, 3,],
            [r'$really\ bad$', r'$bad\ \alpha$', r'$normal$', r'$good$', r'$really\ good$'])
 
+# 而且需要注意的是 l1, l2,要以逗号结尾, 因为plt.plot() 返回的是一个列表
 l1, = plt.plot(x, y1, label='up')  # 若要传进legned，需要在l1后加个逗号
 l2, = plt.plot(x, y2, color='red', linewidth=2.0, linestyle='--', label='down')
 # 使用legend绘制多条曲线
