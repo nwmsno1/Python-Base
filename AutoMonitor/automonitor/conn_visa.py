@@ -29,6 +29,7 @@ class visainst(object):
     def read(self, cmd):
         return self.this_inst.query_ascii_values(cmd, container=np.array)
 
+    
 if __name__ == '__main__':
     list_inst()
     ins = visainst('USB0::0x2A8D::0x1772::MY57190679::INSTR')
