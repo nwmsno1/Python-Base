@@ -12,7 +12,7 @@ plt.scatter(x, y, s=75, c=t, alpha=0.5)
 
 plt.xlim((-1.5, 1.5))
 plt.ylim((-1.5, 1.5))
-plt.xticks(())  # remove ticks
+plt.xticks(())  # ignore xticks
 plt.yticks(())
 
 plt.show()
