@@ -1,6 +1,7 @@
 import visa
 import numpy as np
 
+
 def list_inst():
     rm = visa.ResourceManager()
     print(rm.list_resources())
