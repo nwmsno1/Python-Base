@@ -29,6 +29,6 @@ loop = asyncio.get_event_loop()
 # 将协程加入到事件循环loop,asyncio.get_event_loop,创建一个事件循环，
 # 然后使用run_until_complete将协程注册到事件循环，并启动事件循环
 loop.run_until_complete(main(loop))
-# loop.close()  # Ipython notebook gives error if close loop
+loop.close()  # Ipython notebook gives error if close loop
 print("Async total time:", time.time() - t1)
 
