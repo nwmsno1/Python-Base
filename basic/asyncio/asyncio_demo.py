@@ -17,6 +17,8 @@ async def main(loop):
 
 if __name__ == '__main__':
     t1 = time.time()
+    # 创建一个事件loop
     loop = asyncio.get_event_loop()
+    # 将协程加入到事件循环loop
     loop.run_until_complete(main(loop))
     print("Async total time : ", time.time() - t1)
