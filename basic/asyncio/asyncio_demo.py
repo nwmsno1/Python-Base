@@ -7,7 +7,8 @@ async def job(t):  # 协程对象
     await asyncio.sleep(t)  # wait for "t" seconds, it will look for another job while await
     print('Job ', t, ' takes ', t, ' s')
 
-
+# 通过async关键字定义一个协程（coroutine）,当然协程不能直接运行，需要将协程加入到事件循环loop中
+# asyncio.get_event_loop：创建一个事件循环，然后使用run_until_complete将协程注册到事件循环，并启动事件循环
 async def main(loop):
     # 协程对象不能直接运行，在注册事件循环的时候，其实是run_until_complete方法将协程包装成为了一个任务（task）对象.
     # task对象是Future类的子类，保存了协程运行后的状态，用于未来获取协程的结果
