@@ -6,6 +6,8 @@ async def job(t):  # 协程对象
     print('Start job ', t)
     # 使用async可以定义协程对象，使用await可以针对耗时的操作进行挂起，就像生成器里的yield一样，函数让出控制权。
     # 协程遇到await，事件循环将会挂起该协程，执行别的协程，直到其他的协程也挂起或者执行完毕，再进行下一个协程的执行
+    # 在await asyncio.sleep(x)，因为这里sleep了，模拟了阻塞或者耗时操作，这个时候就会让出控制权。 即当遇到阻塞调用
+    # 的函数的时候，使用await方法将协程的控制权让出,以便loop调用其他的协程。
     await asyncio.sleep(t)  # wait for "t" seconds, it will look for another job while await
     print('Job ', t, ' takes ', t, ' s')
 
