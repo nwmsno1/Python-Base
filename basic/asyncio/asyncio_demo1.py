@@ -13,6 +13,8 @@ async def job(session):
 '''如果需要并发http请求怎么办呢，通常是用requests，但requests是同步的库，如果想异步的话需要引入aiohttp。这里引入一个类，
 from aiohttp import ClientSession，首先要建立一个session对象，然后用session对象去打开网页。session可以进行多项操作，
 比如post, get, put, head等'''
+'''首先async def 关键字定义了这是个异步函数，await 关键字加在需要等待的操作前面，response.read()等待request响应，
+是个耗IO操作。然后使用ClientSession类发起http请求。'''
 async def main(loop):
     async with aiohttp.ClientSession() as session:
         tasks = [loop.create_task(job(session)) for _ in range(2)]
