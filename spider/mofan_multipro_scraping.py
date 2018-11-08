@@ -22,10 +22,10 @@ def parse(base_url, html):
 
 def main():
     base_url = 'https://morvanzhou.github.io/'
-    # if base_url != "http://127.0.0.1:4000/":
-    #     restricted_crawl = True
-    # else:
-    #     restricted_crawl = False
+    if base_url != "http://127.0.0.1:4000/":
+        restricted_crawl = True
+    else:
+        restricted_crawl = False
 
     unseen = set([base_url, ])
     seen = set()
@@ -34,8 +34,8 @@ def main():
     count, t1 = 1, time.time()
 
     while len(unseen) != 0:
-        # if restricted_crawl and len(seen) > 20:
-        #     break
+        if restricted_crawl and len(seen) > 20:
+            break
 
         print('\nDistribute Crawling...')
         crawl_jobs = [pool.apply_async(crawl, args=(url,)) for url in unseen]
