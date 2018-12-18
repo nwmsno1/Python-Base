@@ -1,5 +1,5 @@
 import paramiko
-
+import socket
 
 class SSH(object):
 
@@ -22,3 +22,8 @@ class SSH(object):
 					   banner_timeout=timeout)
 			ssh.close()
 			return True
+		except ConnectionRefusedError:
+			msg = 'No SSH daemon active at ' + self.ip
+		except (TimeoutError, socket.timeout):
+			mag = 'No connection could be established ' + self.ip
+			
