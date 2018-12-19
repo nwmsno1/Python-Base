@@ -3,6 +3,8 @@ import socket
 import logging
 import datetime
 
+logging.getlogger("paramiko").setLevel(logging.WARNING)
+
 class SSH(object):
 
 	def __init__(self, user, passwd, ip, port=22):
@@ -62,3 +64,39 @@ class SSH(object):
 			delta = datetime.timedelta(days=datetime.timedelta.max.days)
 		else:
 			delta = timeout
+			
+		# if we use delta.total_seconds(), the number is too big for the
+        # timeout and cause script fail
+        stdout.channel.settimeout(14400)
+        # Read until success, or time out
+		
+		try:
+			while True:
+				partial = stdout.channel.recv(1024).decode("ISO-8859-1")
+				if len(partial) == 0:
+					logging.debug("SSH Command Exit Code: {:}".format(stdout.channel.recv_exit_status()))
+					if stdout.channel.recv_exit_status() != 0:
+						msg = "Exit status for the std channel was not 0 for "
+						msg += "command {:}, print stdin: {:}".format(c, stdin)
+						msg += ", stdout: {:}, stderr: {:}".fromat(stdout, stderr)
+						logging.debug(msg)
+					for line in stderr.readlines():
+						self._log(line)
+					break
+				self._log(partial)
+				out += partial
+				current_time = datetime.datetime.now()
+				elapsed = current_time - start_time
+				if elapsed > delta:
+					msg = "ERROR = {:} time out, allowed time was: {:}".format(c, timeout)
+					raise TimeoutError(msg)
+			# waiting to long for the command to finish
+			except (TimeoutError, socket.timeout):
+				msg = 'SSH recv socket timed out while waiting for server output'
+				logging.debug(msg)
+				raise TimeoutError(msg)
+			
+			ssh.close()
+			
+			return out
+				
