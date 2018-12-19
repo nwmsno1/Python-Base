@@ -36,10 +36,10 @@ class SSH(object):
 			raise EnvironmentError(msg)
 		except Exception as errorlog:
 			# Added back the generic exception catcher since there might be
-            # a bug in paramiko in the NoValidConnectionError class.
+            		# a bug in paramiko in the NoValidConnectionError class.
 			msg = 'Unhandled fault - ' + str(errorlog)
 		# We will only get here if we have not already raised an exception or
-        # returned from the method.
+        	# returned from the method.
 		self.last_mag = msg
 		logging.debug(msg)
 		return False
@@ -66,9 +66,9 @@ class SSH(object):
 			delta = timeout
 			
 		# if we use delta.total_seconds(), the number is too big for the
-        # timeout and cause script fail
-        stdout.channel.settimeout(14400)
-        # Read until success, or time out
+        	# timeout and cause script fail
+        	stdout.channel.settimeout(14400)
+        	# Read until success, or time out
 		
 		try:
 			while True:
@@ -111,7 +111,7 @@ class SSH(object):
 			elif "INFO:" in line:
 				msg = re.findall("INFO: (.+)", line)
 				# If row is "INFO: " we will not print
-                # Only print if INFO contain content
+                		# Only print if INFO contain content
 				if msg:
 					logging.info(msg[0])
 			else:
