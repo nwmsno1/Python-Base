@@ -99,4 +99,21 @@ class SSH(object):
 			ssh.close()
 			
 			return out
+	
+	@staticmethod
+	def _log(text):
+		# staticmethod don't need instantiate
+		lines = [lines for line in text.split('\n')]
+		
+		for line in lines:
+			if "xxx" in line and not (".xxxlog" in line or ".db" in line):
+				logging.info(line)
+			elif "INFO:" in line:
+				msg = re.findall("INFO: (.+)", line)
+				# If row is "INFO: " we will not print
+                # Only print if INFO contain content
+				if msg:
+					logging.info(msg[0])
+			else:
+				logging.debug(line)
 				
