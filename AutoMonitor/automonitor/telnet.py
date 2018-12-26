@@ -74,7 +74,7 @@ class Telnet(object):
 
 
 if __name__ == '__main__':
-    tn = Telnet('10.186.172.237', 'cpric_0')
+    tn = Telnet('xx.xx.xx.xx', 'user')
     # tn.connect()
-    set = ['config_sniffer 2 1 1', 'enable_emulator','set_cable_length_emulator -m 0 2', 'set_los_laser_emulator 1 1', 'set_los_laser_emulator 0 1']
+    set = ['command1', 'command2','command3']
     print(tn.command_set(set))
