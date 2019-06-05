@@ -19,8 +19,8 @@ def main():
     thread2 = threading.Thread(target=T2_job, name='T2')
     added_thread.start()
     thread2.start()
-    added_thread.join()
-    thread2.join()
+    added_thread.join()  # 阻塞主线程 但不会阻塞thread2
+    thread2.join()  # join的作用是主线程会等待该子线程执行完毕再运行
     print('All done\n')
 
 
