@@ -8,7 +8,7 @@ URL = 'https://morvanzhou.github.io/'
 
 async def job(session):
     async with session.get(URL) as response:
-        return await resonse.text()
+        return await response.text()
     # response = await session.get(URL)
     # return str(response.url)
 
