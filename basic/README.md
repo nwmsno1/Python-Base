@@ -76,4 +76,71 @@ Python的上下文管理器了。”__enter__()”方法会在with语句进入�
         return False  # Only raise exception when SyntaxError 如果遇到SyntaxError的话，异常会被正常抛出，而其他异常的话都会被忽略
 Python中还有一个contextlib模块提供一些简便的上下文管理器功能
     
-## 3.
+## 3. python3中函数和方法的区别
+
+```
+def mytest():
+    pass
+
+
+class People():
+
+    def jump(self):
+        print('jumpping ....')
+
+    @staticmethod
+    def speak(self):
+        print('speaking....')
+
+    @classmethod
+    def run(cls):
+        print('running....')
+
+
+if __name__ == '__main__':
+    print(type(mytest))
+    print('=====================================')
+
+    p = People()
+
+    print(type(p.jump))
+    print(type(People.jump))
+    print('=====================================')
+
+    print(type(p.speak))
+    print(type(People.speak))
+    print('=====================================')
+
+    print(type(p.run))
+    print(type(People.run))
+    print('=====================================')
+    
+    
+    
+    <class 'function'>
+    =====================================
+    <class 'method'>
+    <class 'function'>
+    =====================================
+    <class 'function'>
+    <class 'function'>
+    =====================================
+    <class 'method'>
+    <class 'method'>
+    =====================================
+```
+
+当你向jump中传入的首参为People的实例时，jump就是方法.而当你传入的首参不是People的实例对象时，jump就是函数
+
+```
+p = People()
+People.jump('hello')
+jumpping ....
+People.jump(p)
+jumpping ....
+```
+总结一下，在Python3中：
+1. 普通函数（未定义在类中），都是函数
+2. 静态方法（@staticmethod），都是函数
+3. 类方法（@classmethod），都是方法
+4. 方法和函数区分没有那么明确，而是更加灵活了，一个函数有可能时方法也有可能是函数
