@@ -201,4 +201,92 @@ def foo():
       File "<stdin>", line 4, in bar
     UnboundLocalError: local variable 'a' referenced before assignment
 
+这是因为在执行代码 c = foo()时，python会导入全部的闭包函数体bar()来分析其的局部变量，python规则指定所有在赋值语句左面的变量都是局部变量，则在闭包bar()中，变量a在赋值符号"="的左面，被python认为是bar()中的局部变量。再接下来执行print c()时，程序运行至a = a + 1时，因为先前已经把a归为bar()中的局部变量，所以python会在bar()中去找在赋值语句右面的a的值，结果找不到，就会报错。
+解决的方法很简单，你可以简单认为，可变对象（即我们可以通过调用自身一些方法去做增删改操作且变量地址不变）不存在此问题.而不可变对象则会有
+```
+def foo():
+    a = [1]
+    def bar():
+        a[0] = a[0] + 1
+        return a[0]
+    return bar
+```
+```
+class A():
+    pass
+
+def foo():
+    a = A()
+    a.value = 1
+    def bar():
+        a.value += 1
+        return a.value
+    return bar
+
+c = foo()
+print(c())
+```
+只要将a设定为一个容器就可以了,或者所以在python3以后，在a = a + 1 之前，使用语句nonlocal a就可以了，该语句显式的指定a不是闭包的局部变量
+
+```
+def foo():
+    a = 1
+    def bar():
+        nonlocal a
+        a = a + 1
+        return a
+    return bar
+
+c = foo()
+c
+Out[24]: <function __main__.foo.<locals>.bar>
+c()
+Out[25]: 2
+```
+### 3.用途
+闭包主要是在函数式开发过程中使用。以下介绍两种闭包主要的用途
+#### 用途1，当闭包执行完后，仍然能够保持住当前的运行环境
+比如说，如果你希望函数的每次执行结果，都是基于这个函数上次的运行结果。我以一个类似棋盘游戏的例子来说明。假设棋盘大小为50\*50，左上角为坐标系原点(0,0)，我需要一个函数，接收2个参数，分别为方向(direction)，步长(step)，该函数控制棋子的运动。棋子运动的新的坐标除了依赖于方向和步长以外，当然还要根据原来所处的坐标点，用闭包就可以保持住这个棋子原来所处的坐标
+```
+origin = [0, 0]  # 坐标系统原点
+legal_x = [0, 50]  # x轴方向的合法坐标
+legal_y = [0, 50]  # y轴方向的合法坐标
+def create(pos=origin):
+    def player(direction,step):
+        # 这里应该首先判断参数direction,step的合法性，比如direction不能斜着走，step不能为负等
+        # 然后还要对新生成的x，y坐标的合法性进行判断处理，这里主要是想介绍闭包，就不详细写了
+        new_x = pos[0] + direction[0]*step
+        new_y = pos[1] + direction[1]*step
+        pos[0] = new_x
+        pos[1] = new_y
+        # 注意！此处不能写成 pos = [new_x, new_y]，原因是赋值操作，在上文有说过,
+        return pos
+    return player
+ 
+player = create()  # 创建棋子player，起点为原点
+print player([1,0],10)  # 向x轴正方向移动10步
+print player([0,1],20)  # 向y轴正方向移动20步
+print player([-1,0],10)  # 向x轴负方向移动10步
+
+[10, 0]
+[10, 20]
+[0, 20]
+```
+#### 用途2，闭包可以根据外部作用域的局部变量来得到不同的结果，这有点像一种类似配置功能的作用，我们可以修改外部的变量，闭包根据这个变量展现出不同的功能。比如有时我们需要对某些文件的特殊行进行分析，先要提取出这些特殊行
+```
+def make_filter(keep):
+    def the_filter(file_name):
+        file = open(file_name)
+        lines = file.readlines()
+        file.close()
+        filter_doc = [i for i in lines if keep in i]
+        return filter_doc
+    return the_filter
+  ```
+如果我们需要取得文件"result.txt"中含有"pass"关键字的行，则可以这样使用例子程序
+```
+filter = make_filter("pass")
+filter_result = filter("result.txt")
+```
+
 ## 5. 深拷贝与浅拷贝
