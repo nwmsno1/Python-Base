@@ -146,6 +146,59 @@ jumpping ....
 4. 方法和函数区分没有那么明确，而是更加灵活了，一个函数有可能时方法也有可能是函数
 
 ## 4. 闭包
+***
+python中的闭包从表现形式上定义（解释）为：如果在一个内部函数中，对在外部作用域（但不是在全局作用域，非局部变量）的变量进行引用，那么内部函数就被认为是闭包（closure).
+```
+>>>def addx(x):
+>>>    def adder(y):
+>>>        return x + y
+>>>    return adder
+>>> c =  addx(8)
+>>> type(c)
+<type 'function'>
+>>> c.__name__
+'adder'
+>>> c(10)
+18
+```
 
+如果在一个内部函数中：adder(y)就是这个内部函数. 对于外部作用域（非全局作用域，非局部变量）的变量进行引用，x就是被引用的变量，x在外部作用域addx中，但不在全局作用域中，则这个内部函数adder就是一个闭包
+
+### 1.在闭包中是不能修改外部作用域的局部变量的
+```
+>>> def foo():
+...     m = 0
+...     def foo1():
+...         m = 1
+...         print m
+...
+...     print m
+...     foo1()
+...     print m
+...
+>>> foo()
+0
+1
+0
+```
+从执行结果看，虽然在闭包里也定义了一个变量m，但是其不会改变外部函数中的的局部变量m.
+
+### 2.以下这段代码是在python中使用闭包时一段经典的错误代码
+```
+def foo():
+    a = 1
+    def bar():
+        a = a + 1
+        return a
+    return bar
+```
+这段程序的本意是要通过在每次调用闭包函数时都对变量a进行递增的操作。但在实际使用时
+
+    >>> c = foo()
+    >>> print c()
+    Traceback (most recent call last):
+      File "<stdin>", line 1, in <module>
+      File "<stdin>", line 4, in bar
+    UnboundLocalError: local variable 'a' referenced before assignment
 
 ## 5. 深拷贝与浅拷贝
