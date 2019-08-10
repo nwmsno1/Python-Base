@@ -20,9 +20,10 @@ sudo pip install -U virtualenv
 ```
 virtualenv --system-site-packages -p python3.6 ./venv
 ```
-## 6. Activate virtual env
+## 6. Activate or deactivate virtual env
 ```
 source ./venv/bin/activate
+deactivate
 ```
 ## 7. Show package installed within the virtual env
 ```
