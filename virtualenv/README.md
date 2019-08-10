@@ -34,3 +34,11 @@ deactivate
 (venv) $ pip install --upgrade tensorflow
 (venv) $ python -c "import tensorflow as tf"
 ```
+## 9. Install jupyter
+```
+pip install jupyter
+```
+## 10. Config jupyter kernal with venv
+```
+python -m ipykernal install --user --name=venv
+```
