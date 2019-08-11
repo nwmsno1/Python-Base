@@ -265,6 +265,7 @@ Wait for 2 seconds...
 ```
 instances = {}
 
+
 def singleton(cls):
     def get_instance(*args, **kw):
         cls_name = cls.__name__
@@ -276,6 +277,7 @@ def singleton(cls):
         return instances[cls_name]
     return get_instance
 
+
 @singleton
 class User:
     _instance = None
@@ -283,7 +285,320 @@ class User:
     def __init__(self, name):
         print('===== 3 ====')
         self.name = name
+
+
+if __name__ == '__main__':
+    u1 = User('nwmsno1')
+    u1.age = 20
+    u2 = User('nwmsno2')
+    u2.age = 20
+    print(u1 is u2)
 ```
 可以看到我们用singleton 这个装饰函数来装饰 User 这个类。装饰器用在类上，并不是很常见，但只要熟悉装饰器的实现过程，就不难以实现对类的装饰。在上面这个例子中，装饰器就只是实现对类实例的生成的控制而已。
 
-其实例化的过程，你可以参考我这里的调试过程，加以理解。
+## 09. wraps 装饰器有啥用？
+在 functools 标准库中有提供一个 wraps 装饰器，你应该也经常见过，那他有啥用呢？
+先来看一个例子
+```
+def wrapper(func):
+    def inner_function():
+        pass
+    return inner_function
+
+@wrapper
+def wrapped():
+    pass
+
+print(wrapped.__name__)
+#inner_function
+```
+为什么会这样子？不是应该返回 `func` 吗？
+
+这也不难理解，因为上边执行`func` 和下边 `decorator(func)`  是等价的，所以上面 `func.__name__` 是等价于下面`decorator(func).__name__` 的，那当然名字是 `inner_function`
+```
+def wrapper(func):
+    def inner_function():
+        pass
+    return inner_function
+
+def wrapped():
+    pass
+
+print(wrapper(wrapped).__name__)
+#inner_function
+```
+那如何避免这种情况的产生？方法是使用`functools .wraps` 装饰器，它的作用就是将`被修饰的函数(wrapped)`的一些属性值赋值给`修饰器函数(wrapper)` ，最终让属性的显示更符合我们的直觉。
+```
+from functools import wraps
+
+def wrapper(func):
+    @wraps(func)
+    def inner_function():
+        pass
+    return inner_function
+
+@wrapper
+def wrapped():
+    pass
+
+print(wrapped.__name__)
+# wrapped
+```
+准确点说，wraps 其实是一个`偏函数对象（partial）`，源码如下
+```
+def wraps(wrapped,
+          assigned = WRAPPER_ASSIGNMENTS,
+          updated = WRAPPER_UPDATES):
+    return partial(update_wrapper, wrapped=wrapped,
+                   assigned=assigned, updated=updated)
+```
+可以看到wraps其实就是调用了一个函数`update_wrapper`，知道原理后，我们改写上面的代码，在不使用 wraps的情况下，也可以让`wrapped.__name__` 打印出 wrapped，代码如下：
+```
+from functools import update_wrapper
+
+WRAPPER_ASSIGNMENTS = ('__module__', '__name__', '__qualname__', '__doc__',
+                       '__annotations__')
+
+def wrapper(func):
+    def inner_function():
+        pass
+
+    update_wrapper(inner_function, func, assigned=WRAPPER_ASSIGNMENTS)
+    return inner_function
+
+@wrapper
+def wrapped():
+    pass
+
+print(wrapped.__name__)
+# wrapped
+```
+
+## 10. 内置装饰器：property
+以上，我们介绍的都是自定义的装饰器。
+其实Python语言本身也有一些装饰器。比如property这个内建装饰器，我们再熟悉不过了。
+它通常存在于类中，可以将一个函数定义成一个属性，属性的值就是该函数return的内容。
+通常我们给实例绑定属性是这样的
+```
+class Student(object):
+    def __init__(self, name, age=None):
+        self.name = name
+        self.age = age
+
+# 实例化
+xiaoming = Student("小明")
+
+# 添加属性
+xiaoming.age=25
+
+# 查询属性
+xiaoming.age
+
+# 删除属性
+del xiaoming.age
+```
+但是稍有经验的开发人员，一下就可以看出，这样直接把属性暴露出去，虽然写起来很简单，但是并不能对属性的值做合法性限制。为了实现这个功能，我们可以这样写。
+```
+class Student(object):
+    def __init__(self, name):
+        self.name = name
+        self.name = None
+
+    def set_age(self, age):
+        if not isinstance(age, int):
+            raise ValueError('输入不合法：年龄必须为数值!')
+        if not 0 < age < 100:
+            raise ValueError('输入不合法：年龄范围必须0-100')
+        self._age=age
+
+    def get_age(self):
+        return self._age
+
+    def del_age(self):
+        self._age = None
+
+
+xiaoming = Student("小明")
+
+# 添加属性
+xiaoming.set_age(25)
+
+# 查询属性
+xiaoming.get_age()
+
+# 删除属性
+xiaoming.del_age()
+```
+上面的代码设计虽然可以变量的定义，但是可以发现不管是获取还是赋值（通过函数）都和我们平时见到的不一样。
+按照我们思维习惯应该是这样的。
+```
+# 赋值
+xiaoming.age = 25
+
+# 获取
+xiaoming.age
+```
+那么这样的方式我们如何实现呢。请看下面的代码。
+```
+class Student(object):
+    def __init__(self, name):
+        self.name = name
+        self.name = None
+
+    @property
+    def age(self):
+        return self._age
+
+    @age.setter
+    def age(self, value):
+        if not isinstance(value, int):
+            raise ValueError('输入不合法：年龄必须为数值!')
+        if not 0 < value < 100:
+            raise ValueError('输入不合法：年龄范围必须0-100')
+        self._age=value
+
+    @age.deleter
+    def age(self):
+        del self._age
+
+xiaoming = Student("小明")
+
+# 设置属性
+xiaoming.age = 25
+
+# 查询属性
+xiaoming.age
+
+# 删除属性
+del xiaoming.age
+```
+用`@property`装饰过的函数，会将一个函数定义成一个属性，属性的值就是该函数return的内容。同时，会将这个函数变成另外一个装饰器。就像后面我们使用的`@age.setter`和`@age.deleter`。
+`@age.setter` 使得我们可以使用`XiaoMing.age = 25`这样的方式直接赋值。
+`@age.deleter` 使得我们可以使用`del XiaoMing.age`这样的方式来删除属性。
+`property` 的底层实现机制是「描述符」，为此我还写过一篇文章。
+这里也介绍一下吧，正好将这些看似零散的文章全部串起来。
+如下，我写了一个类，里面使用了 `property` 将 `math` 变成了类实例的属性
+```
+class Student:
+    def __init__(self, name):
+        self.name = name
+
+    @property
+    def math(self):
+        return self._math
+
+    @math.setter
+    def math(self, value):
+        if 0 <= value <= 100:
+            self._math = value
+        else:
+            raise ValueError("Valid value must be in [0, 100]")
+```
+为什么说 `property` 底层是基于描述符协议的呢？通过 `PyCharm` 点击进入 `property` 的源码，很可惜，只是一份类似文档一样的伪源码，并没有其具体的实现逻辑。
+不过，从这份伪源码的魔法函数结构组成，可以大体知道其实现逻辑。
+这里我自己通过模仿其函数结构，结合「描述符协议」来自己实现类 `property` 特性。
+代码如下：
+```
+class TestProperty(object):
+
+    def __init__(self, fget=None, fset=None, fdel=None, doc=None):
+        self.fget = fget
+        self.fset = fset
+        self.fdel = fdel
+        self.__doc__ = doc
+
+    def __get__(self, obj, objtype=None):
+        print("in __get__")
+        if obj is None:
+            return self
+        if self.fget is None:
+            raise AttributeError
+        return self.fget(obj)
+
+    def __set__(self, obj, value):
+        print("in __set__")
+        if self.fset is None:
+            raise AttributeError
+        self.fset(obj, value)
+
+    def __delete__(self, obj):
+        print("in __delete__")
+        if self.fdel is None:
+            raise AttributeError
+        self.fdel(obj)
+
+
+    def getter(self, fget):
+        print("in getter")
+        return type(self)(fget, self.fset, self.fdel, self.__doc__)
+
+    def setter(self, fset):
+        print("in setter")
+        return type(self)(self.fget, fset, self.fdel, self.__doc__)
+
+    def deleter(self, fdel):
+        print("in deleter")
+        return type(self)(self.fget, self.fset, fdel, self.__doc__)
+```
+然后 Student 类，我们也相应改成如下
+```
+class Student:
+    def __init__(self, name):
+        self.name = name
+
+    # 其实只有这里改变
+    @TestProperty
+    def math(self):
+        return self._math
+
+    @math.setter
+    def math(self, value):
+        if 0 <= value <= 100:
+            self._math = value
+        else:
+            raise ValueError("Valid value must be in [0, 100]")
+```
+为了尽量让你少产生一点疑惑，我这里做两点说明：
+
+1. 使用`TestProperty`装饰后，`math` 不再是一个函数，而是`TestProperty类`的一个实例。所以第二个`math`函数可以使用 `math.setter` 来装饰，本质是调用`TestProperty.setter` 来产生一个新的 `TestProperty` 实例赋值给第二个`math`。
+
+2. 第一个 `math` 和第二个 `math` 是两个不同 `TestProperty` 实例。但他们都属于同一个`描述符类（TestProperty）`，当对 `math` 对于赋值时，就会进入 `TestProperty.__set__`，当对`math` 进行取值里，就会进入 `TestProperty.__get__`。仔细一看，其实最终访问的还是`Student实例`的 `_math` 属性。
+说了这么多，还是运行一下，更加直观一点。
+```
+# 运行后，会直接打印这一行，这是在实例化 TestProperty 并赋值给第二个math
+in setter
+>>>
+>>> s1.math = 90
+in __set__
+>>> s1.math
+in __get__
+90
+```
+11. 其他装饰器：装饰器实战
+在我看来，使用装饰器，可以达到如下目的：
+1. 使代码可读性更高，逼格更高；
+2. 代码结构更加清晰，代码冗余度更低；
+
+有一个场景，可以用装饰器很好的实现，暂且放上来看看。
+这是一个实现控制函数运行超时的装饰器。如果超时，则会抛出超时异常。
+```
+import signal
+
+class TimeoutException(Exception):
+    def __init__(self, error='Timeout waiting for response from Cloud'):
+        Exception.__init__(self, error)
+
+
+def timeout_limit(timeout_time):
+    def wraps(func):
+        def handler(signum, frame):
+            raise TimeoutException()
+
+        def deco(*args, **kwargs):
+            signal.signal(signal.SIGALRM, handler)
+            signal.alarm(timeout_time)
+            func(*args, **kwargs)
+            signal.alarm(0)
+        return deco
+    return wraps
+```
