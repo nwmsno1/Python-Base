@@ -30,6 +30,43 @@ example:假如我们需要一个永远都是正数的整数类型，通过集成
     
 通过重载\_\_new\_\_方法，我们实现了需要的功能。
 另外一个作用，关于自定义metaclass,还可以实现单例模式
+下面这段代码输出什么
+```
+class B:
+    def fn(self):
+        print('B fn')
+    
+    def __init__(self):
+        print('B init')
+
+
+class A(object):
+    def fn(self):
+        print('A fn')
+    
+    def __new__(cls, a):
+        print('new', a)
+        if a > 10:
+            return super(A, cls).__new__(cls)
+        return B()
+    
+    def __init__(self, a):
+        print('init', a)
+        
+a1 = A(5)
+a1.fn()
+a2 = A(20)
+a2.fn()
+```
+答案
+```
+new 5
+B init
+B fn
+new 20
+init 20
+A fn
+```
 
 ## 2. 上下文管理
 当我们使用完一个资源后，我们需要手动的关闭掉它，比如操作文件，建立数据库连接等。但是，在使用资源的过程中，如果遇到异常，很可能错误被直接抛出，导致来
@@ -289,6 +326,19 @@ filter = make_filter("pass")
 filter_result = filter("result.txt")
 ```
 
+写一个函数，接收整数参数n, 返回一个函数，函数的功能是把函数的参数和n相乘并把结果返回。
+
+答案：
+```
+def mulby(num):
+    def gn(val):
+        return num * val
+    return gn
+    
+bb = mulby(7)
+print(bb(9))
+```
+
 ## 5. 深拷贝与浅拷贝
 
 
@@ -312,7 +362,7 @@ obj.show()
 obj.__class__ = A
 obj.show()
 ```
-`__class_`方法指向了类对象，只用给他赋值类型A,然后调用方法show,但是用完了记得修改回来
+`__class__`方法指向了类对象，只用给他赋值类型A,然后调用方法show,但是用完了记得修改回来
 
 ## 7. 方法对象
 问题：为了让下面这段代码运行，需要增加哪些代码?
@@ -343,3 +393,132 @@ class A(object):
     def __call__(self, num):
         print('call:', num + self.__a)
 ```
+
+## 8. list 和 dict 的生成
+下面的代码输出什么？
+```
+ls = [1, 2, 3, 4]
+list1 = [i for i in ls if i > 2]
+print(list1)
+
+list2 = [i*2 for i in ls if i > 2]
+print(list2)
+
+dic1 = {x: x**2 for x in (2, 4, 6)}
+print(dic1)
+
+dic2 = {x: 'item' + str(x**2) for x in (2, 4, 6)}
+print(dic2)
+
+set1 = {x for x in 'hello world' if x not in 'lower level'}
+print(set1)
+```
+答案
+```
+[3, 4]
+[6, 8]
+{2: 4, 4: 16, 6: 36}
+{2: 'item4', 4: 'item16', 6: 'item36'}
+{'d', 'h'}
+```
+
+## 9. 一行代码交换两个变量的值
+```
+a = 8
+b = 9
+
+a, b = b, a
+```
+
+## 10. 默认方法
+如下的代码：
+```
+class A(object):
+    def __init__(self, a, b):
+        self.a1 = a
+        self.b1 = b
+        print('init')
+
+    def mydefault(self):
+        print('default')
+
+a1 = A(10, 20)
+a1.fn1()
+a1.fn2()
+a1.fn3()
+```
+输出：
+```
+Traceback (most recent call last):
+  File "C:/Users/TS2/PycharmProjects/python_script/defaultmethod.py", line 11, in <module>
+    a1.fn1()
+AttributeError: 'A' object has no attribute 'fn1'
+```
+方法fn1/fn2/fn3都没有定义， 添加代码， 是没有定义的代码都调用mydefault函数，上面的代码应该输出
+```
+default
+default
+default
+```
+```
+class A(object):
+    def __init__(self, a, b):
+        self.a1 = a
+        self.b1 = b
+        print('init')
+
+    def mydefault(self):
+        print('default')
+
+    def __getattr__(self, name):
+        return self.mydefault
+
+a1 = A(10, 20)
+a1.fn1()
+a1.fn2()
+a1.fn3()
+```
+输出
+```
+init
+default
+default
+default
+```
+方法__getattr__只有当没有定义的方法调用时，才是调用它。当fn1方法传入参数时，我们可以给mydefault方法增加一个`*args`不定参数来兼容
+```
+class A(object):
+    def __init__(self, a, b):
+        self.a1 = a
+        self.b1 = b
+        print('init')
+
+    def mydefault(self, *args):
+        print('default:' + str(args[0]))
+
+    def __getattr__(self, name):
+        print('other fn:', name)
+        return self.mydefault
+
+a1 = A(10, 20)
+a1.fn1(33)
+a1.fn2('hello')
+a1.fn3(10)
+```
+输出
+```
+init
+other fn: fn1
+default:33
+other fn: fn2
+default:hello
+other fn: fn3
+default:10
+```
+
+## 11. 包管理
+一个包里有三个模块， mod1.py, mod2.py, mod3.py, 但使用`from demopack import *`导入模块时，如何保证mod1, mod3都被导入了
+答案：增加`__init__.py`文件，并在文件中增加
+```
+__all__ = ['mod1', 'mod3']
+
