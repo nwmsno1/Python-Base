@@ -523,7 +523,7 @@ default:10
 __all__ = ['mod1', 'mod3']
 ```
 
-## 12. __dict__ 方法
+## 12. \_\_dict\_\_ 方法
 
 ```
 class A(object):
@@ -562,7 +562,7 @@ print(obj.__dict__)
 
 对象的`__dict__`中存储了一些self.xxx的一些属性
 
-## 13. __str__ 方法
+## 13. \_\_str\_\_ 方法
 使用print输出对象的时候，只要自己定义了`__str__(self)`方法，那么就会打印`__str__`方法中return的数据
 ```
 class Student(object):
@@ -583,7 +583,7 @@ print(a)
 张三的年龄是：30
 ```
 
-## 14. __getattr__ 、 __setattr__
+## 14. \_\_getattr\_\_ 、 \_\_setattr\_\_
 可以获取或者设置属性
 ```
 class Student(object):
