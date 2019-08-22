@@ -521,4 +521,89 @@ default:10
 答案：增加`__init__.py`文件，并在文件中增加
 ```
 __all__ = ['mod1', 'mod3']
+```
+
+## 12. __dict__ 方法
+
+```
+class A(object):
+    a = 0
+    b = 1
+    
+    def __init__(self):
+        self.a = 5
+        self.b = 6
+    
+    def test(self):
+        print("普通方法")
+        
+    @staticmethod
+    def static_test(self):
+        print("静态方法")
+        
+    @classmethod
+    def class_test(self):
+        print("类方法")
+        
+obj = A()
+print(A.__dict__)
+print(obj.__dict__)
+```
+写了一个类和对象的，分别打印类和对象的`__dict__`,看会出现什么
+```
+# 类调用__dict__
+{'__module__': '__main__', 'a': 0, 'b': 1, '__init__': <function A.__init__ at 0x0172C4B0>, 'test': <function A.test at 0x0172C468>, 'static_test': <staticmethod object at 0x01726830>, 'class_test': <classmethod object at 0x017268B0>, '__dict__': <attribute '__dict__' of 'A' objects>, '__weakref__': <attribute '__weakref__' of 'A' objects>, '__doc__': None}
+
+# 对象调用__dict__
+{'a': 5, 'b': 6}
+```
+
+类属性、类的普通方法、静态方法、类方法以及一些内置的属性都放在类的`__dict__`里的
+
+对象的`__dict__`中存储了一些self.xxx的一些属性
+
+## 13. __str__ 方法
+使用print输出对象的时候，只要自己定义了`__str__(self)`方法，那么就会打印`__str__`方法中return的数据
+```
+class Student(object):
+    
+    # 初始化对象
+    def __init__(self, new_name, new_age):
+        self.name = new_name
+        self.age = new_age
+        
+    def __str__(self):
+        return("%s的年龄是：%d" % (self.name, self.age))
+
+a = Student("张三", 30)
+print(a)
+```
+打印结果：
+```
+张三的年龄是：30
+```
+
+## 14. __getattr__ 、 __setattr__
+可以获取或者设置属性
+```
+class Student(object):
+    
+    # 初始化对象
+    def __init__(self, name, age):
+        self.name = name
+        self.age = age
+        
+    def __getattr__(self):
+        return self.name
+        
+    def __setattr__(self, name, age)
+        self.__dict__['name'] = 'add_{}'.format(value)
+        
+a = Student("张三"， 30）
+print(a.__dcit__)
+```
+打印结果
+```
+{'name': 'add_30'}
+```
 
