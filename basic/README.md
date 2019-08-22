@@ -67,6 +67,43 @@ new 20
 init 20
 A fn
 ```
+关于对象的创建和销毁，这三个魔法方法必须掌握，python中万物皆对象，充分了解一个对象的生命周期，必将加深你对python面向对象的了解
+```
+class A(object):
+    def __init__(self):
+        print("打印self的id，证明此处的self实例和__new__方法返回的实例一致")
+        print(id(self))
+        print("这是 init 方法")
+    
+    def __new__(cls):
+        print("这是new方法")
+        print("打印类的id")
+        print(id(cls))
+        res = object.__new__(cls)
+        print("打印实例的id")
+        print(id(res))
+        return res
+        
+    def __del__(self):
+        print("删除实例时调用__del__方法")
+    
+a = A()
+del a
+```
+打印结果
+```
+这是new方法
+打印类的id
+7404824
+打印实例的id
+4683280
+打印self的id，证明此处的self实例和__new__方法返回的实例一致
+4683280
+这是 init 方法
+删除实例时调用__del__方法
+```
+说明：  
+1. a = A()在创建实例时，先执行了`__new__`方法创建的对象，`__new__`方法必须要有返回值，返回实例化出来的实例
 
 ## 2. 上下文管理
 当我们使用完一个资源后，我们需要手动的关闭掉它，比如操作文件，建立数据库连接等。但是，在使用资源的过程中，如果遇到异常，很可能错误被直接抛出，导致来
